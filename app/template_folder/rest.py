@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from typing import Any
 
 from app.dao.dao_utils import transactional
 from app.dao.service_user_dao import dao_get_active_service_users, dao_get_service_user
@@ -43,7 +44,7 @@ def get_template_folders_for_service(service_id):
 
 @template_folder_blueprint.route("", methods=["POST"])
 def create_template_folder(service_id):
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_create_template_folder_schema)
     if data.get("parent_id") is not None:
@@ -68,7 +69,7 @@ def create_template_folder(service_id):
 
 @template_folder_blueprint.route("/<uuid:template_folder_id>", methods=["POST"])
 def update_template_folder(service_id, template_folder_id):
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_update_template_folder_schema)
 
@@ -99,7 +100,7 @@ def delete_template_folder(service_id, template_folder_id):
 @template_folder_blueprint.route("/<uuid:target_template_folder_id>/contents", methods=["POST"])
 @transactional
 def move_to_template_folder(service_id, target_template_folder_id=None):
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_move_template_folder_schema)
 

@@ -3,6 +3,7 @@ import json
 import pickle
 import uuid
 from datetime import datetime, timedelta
+from typing import Any
 
 import pwnedpasswords
 from fido2 import cbor
@@ -107,7 +108,7 @@ def handle_integrity_error(exc):
 def create_user():
     # import pdb; pdb.set_trace()
     user_to_create, errors = create_user_schema.load(request.get_json())
-    req_json = request.get_json()
+    req_json: Any = request.get_json()
 
     password = req_json.get("password", None)
     if not password:
@@ -127,7 +128,7 @@ def create_user():
 @user_blueprint.route("/<uuid:user_id>", methods=["POST"])
 def update_user_attribute(user_id):
     user_to_update = get_user_by_id(user_id=user_id)
-    req_json = request.get_json()
+    req_json: Any = request.get_json()
     if "updated_by" in req_json:
         updated_by = get_user_by_id(user_id=req_json.pop("updated_by"))
     else:
@@ -211,7 +212,7 @@ def user_reset_failed_login_count(user_id):
 @user_blueprint.route("/<uuid:user_id>/verify/password", methods=["POST"])
 def verify_user_password(user_id):
     user_to_verify = get_user_by_id(user_id=user_id)
-    data = request.get_json()
+    data: Any = request.get_json()
     try:
         txt_pwd = data["password"]
     except KeyError:
@@ -233,7 +234,7 @@ def verify_user_password(user_id):
 
 @user_blueprint.route("/<uuid:user_id>/verify/code", methods=["POST"])
 def verify_user_code(user_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_verify_code_schema)
 
     user_to_verify = get_user_by_id(user_id=user_id)
@@ -440,7 +441,8 @@ def send_contact_request(user_id):
     user = None
 
     try:
-        contact = ContactRequest(**request.json)
+        data: Any = request.json
+        contact = ContactRequest(**data)
         user = get_user_by_email(contact.email_address)
         if not any([not s.restricted for s in user.services]):
             contact.tags = ["z_skip_opsgenie", "z_skip_urgent_escalation"]
@@ -508,7 +510,7 @@ def set_permissions(user_id, service_id):
     user = service_user.user
     service = dao_fetch_service_by_id(service_id=service_id)
 
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_set_permissions_schema)
 
     permission_list = [
@@ -589,7 +591,7 @@ def send_user_reset_password():
 @user_blueprint.route("/<uuid:user_id>/update-password", methods=["POST"])
 def update_password(user_id):
     user = get_user_by_id(user_id=user_id)
-    req_json = request.get_json()
+    req_json: Any = request.get_json()
     pwd = req_json.get("_password")
     update_dct, errors = user_update_password_schema_load_json.load(req_json)
     if errors:
@@ -627,7 +629,7 @@ def list_fido2_keys_user(user_id):
 @user_blueprint.route("/<uuid:user_id>/fido2_keys", methods=["POST"])
 def create_fido2_keys_user(user_id):
     user = get_user_and_accounts(user_id)
-    data = request.get_json()
+    data: Any = request.get_json()
     cbor_data = cbor.decode(base64.b64decode(data["payload"]))
     validate(data, fido2_key_schema)
 
@@ -677,7 +679,7 @@ def fido2_keys_user_validate(user_id):
     keys = list_fido2_keys(user_id)
     credentials = list(map(lambda k: pickle.loads(base64.b64decode(k.key)), keys))
 
-    data = request.get_json()
+    data: Any = request.get_json()
     cbor_data = cbor.decode(base64.b64decode(data["payload"]))
 
     credential_id = cbor_data["credentialId"]

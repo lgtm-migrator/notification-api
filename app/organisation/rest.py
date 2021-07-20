@@ -1,5 +1,6 @@
 from flask import Blueprint, abort, current_app, jsonify, request
 from sqlalchemy.exc import IntegrityError
+from typing import Any
 
 from app.config import QueueNames
 from app.dao.organisation_dao import (
@@ -77,7 +78,7 @@ def get_organisation_by_domain():
 
 @organisation_blueprint.route("", methods=["POST"])
 def create_organisation():
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_create_organisation_schema)
 
@@ -88,7 +89,7 @@ def create_organisation():
 
 @organisation_blueprint.route("/<uuid:organisation_id>", methods=["POST"])
 def update_organisation(organisation_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_update_organisation_schema)
     result = dao_update_organisation(organisation_id, **data)
 
@@ -105,7 +106,7 @@ def update_organisation(organisation_id):
 
 @organisation_blueprint.route("/<uuid:organisation_id>/service", methods=["POST"])
 def link_service_to_organisation(organisation_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_link_service_to_organisation_schema)
     service = dao_fetch_service_by_id(data["service_id"])
     service.organisation = None
