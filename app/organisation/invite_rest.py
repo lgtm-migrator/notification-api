@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 from notifications_utils.url_safe_token import generate_token
+from typing import Any
 
 from app.config import QueueNames
 from app.dao.invited_org_user_dao import (
@@ -31,7 +32,7 @@ register_errors(organisation_invite_blueprint)
 
 @organisation_invite_blueprint.route("", methods=["POST"])
 def invite_user_to_org(organisation_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_create_invited_org_user_status_schema)
 
     invited_org_user = InvitedOrganisationUser(
@@ -77,7 +78,7 @@ def get_invited_org_users_by_organisation(organisation_id):
 def update_org_invite_status(organisation_id, invited_org_user_id):
     fetched = get_invited_org_user(organisation_id=organisation_id, invited_org_user_id=invited_org_user_id)
 
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_update_invited_org_user_status_schema)
 
     fetched.status = data["status"]

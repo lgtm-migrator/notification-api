@@ -66,10 +66,10 @@ class AwsSnsClient(SmsClient):
                 response = client.publish(PhoneNumber=to, Message=content, MessageAttributes=attributes)
             except botocore.exceptions.ClientError as e:
                 self.statsd_client.incr("clients.sns.error")
-                raise str(e)
+                raise Exception(str(e))
             except Exception as e:
                 self.statsd_client.incr("clients.sns.error")
-                raise str(e)
+                raise Exception(str(e))
             finally:
                 elapsed_time = monotonic() - start_time
                 self.current_app.logger.info("AWS SNS request finished in {}".format(elapsed_time))

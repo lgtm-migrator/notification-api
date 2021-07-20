@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from typing import Any
 
 from app.dao.provider_details_dao import (
     dao_get_provider_stats,
@@ -53,7 +54,7 @@ def get_provider_versions(provider_details_id):
 @provider_details.route("/<uuid:provider_details_id>", methods=["POST"])
 def update_provider_details(provider_details_id):
     valid_keys = {"priority", "created_by", "active"}
-    req_json = request.get_json()
+    req_json: Any = request.get_json()
 
     invalid_keys = req_json.keys() - valid_keys
     if invalid_keys:

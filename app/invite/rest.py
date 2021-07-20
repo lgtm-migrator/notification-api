@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, jsonify, request
+from typing import Any
 
 from app.config import QueueNames
 from app.dao.invited_user_dao import (
@@ -22,7 +23,7 @@ register_errors(invite)
 
 @invite.route("", methods=["POST"])
 def create_invited_user(service_id):
-    request_json = request.get_json()
+    request_json: Any = request.get_json()
     invited_user, errors = invited_user_schema.load(request_json)
     save_invited_user(invited_user)
 
@@ -64,7 +65,8 @@ def update_invited_user(service_id, invited_user_id):
     fetched = get_invited_user(service_id=service_id, invited_user_id=invited_user_id)
 
     current_data = dict(invited_user_schema.dump(fetched).data.items())
-    current_data.update(request.get_json())
+    data: Any = request.get_json()
+    current_data.update(data)
     update_dict = invited_user_schema.load(current_data).data
     save_invited_user(update_dict)
     return jsonify(data=invited_user_schema.dump(fetched).data), 200
