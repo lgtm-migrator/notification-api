@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
 from typing import Any
+
+from flask import Blueprint, jsonify, request
 
 from app.dao.email_branding_dao import (
     dao_create_email_branding,

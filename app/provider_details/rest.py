@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
 from typing import Any
+
+from flask import Blueprint, jsonify, request
 
 from app.dao.provider_details_dao import (
     dao_get_provider_stats,

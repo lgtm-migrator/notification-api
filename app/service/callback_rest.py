@@ -1,6 +1,7 @@
+from typing import Any
+
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Any
 
 from app.dao.service_callback_api_dao import (
     delete_service_callback_api,

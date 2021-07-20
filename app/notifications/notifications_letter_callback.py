@@ -1,5 +1,6 @@
 import json
 from functools import wraps
+from typing import Any
 
 from flask import Blueprint, current_app, jsonify, request
 
@@ -45,7 +46,7 @@ def validate_schema(schema):
 @letter_callback_blueprint.route("/notifications/letter/dvla", methods=["POST"])
 @validate_schema(dvla_sns_callback_schema)
 def process_letter_response():
-    req_json = request.get_json(force=True)
+    req_json: Any = request.get_json(force=True)
     current_app.logger.debug("Received SNS callback: {}".format(req_json))
     if not autoconfirm_subscription(req_json):
         # The callback should have one record for an S3 Put Event.

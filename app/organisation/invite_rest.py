@@ -1,6 +1,7 @@
+from typing import Any
+
 from flask import Blueprint, current_app, jsonify, request
 from notifications_utils.url_safe_token import generate_token
-from typing import Any
 
 from app.config import QueueNames
 from app.dao.invited_org_user_dao import (

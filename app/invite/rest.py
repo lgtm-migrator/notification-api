@@ -1,5 +1,6 @@
-from flask import Blueprint, current_app, jsonify, request
 from typing import Any
+
+from flask import Blueprint, current_app, jsonify, request
 
 from app.config import QueueNames
 from app.dao.invited_user_dao import (

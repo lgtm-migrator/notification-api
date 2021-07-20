@@ -1,6 +1,7 @@
+from typing import Any
+
 from flask import Blueprint, abort, current_app, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from typing import Any
 
 from app.config import QueueNames
 from app.dao.organisation_dao import (

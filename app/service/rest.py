@@ -1,6 +1,6 @@
 import itertools
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 
 from flask import Blueprint, current_app, jsonify, request
 from notifications_utils.clients.redis import (

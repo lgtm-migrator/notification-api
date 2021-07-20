@@ -1,6 +1,7 @@
+from typing import Any, Optional
+
 from dateutil import parser as dateparser
 from flask import Blueprint, current_app, jsonify, request
-from typing import Any, Optional
 
 from app.aws.s3 import get_job_metadata_from_s3
 from app.celery.tasks import process_job
