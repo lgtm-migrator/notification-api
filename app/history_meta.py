@@ -15,6 +15,7 @@ session events.
 
 """
 import datetime
+from typing import Any, Dict, Optional
 
 from sqlalchemy import Column, ForeignKeyConstraint, Integer, Table, util
 from sqlalchemy.ext.declarative import declared_attr
@@ -62,6 +63,8 @@ def _history_mapper(local_mapper):  # noqa (C901 too complex)
         return col
 
     properties = util.OrderedDict()
+    table: Optional[Table]
+
     if not super_mapper or local_mapper.local_table is not super_mapper.local_table:
         cols = []
         version_meta = {"version_meta": True}
@@ -166,7 +169,7 @@ def create_history(obj, history_cls=None):
     obj_mapper = object_mapper(obj)
 
     obj_state = attributes.instance_state(obj)
-    data = {}
+    data: Dict[str, Optional[Any]] = {}
     for prop in obj_mapper.iterate_properties:
 
         # expired object attributes and also deferred cols might not

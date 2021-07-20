@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from typing import Any
 
 from app.dao.email_branding_dao import (
     dao_create_email_branding,
@@ -32,7 +33,7 @@ def get_email_branding_by_id(email_branding_id):
 
 @email_branding_blueprint.route("", methods=["POST"])
 def create_email_branding():
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_create_email_branding_schema)
 
@@ -46,7 +47,7 @@ def create_email_branding():
 
 @email_branding_blueprint.route("/<uuid:email_branding_id>", methods=["POST"])
 def update_email_branding(email_branding_id):
-    data = request.get_json()
+    data: Any = request.get_json()
 
     validate(data, post_update_email_branding_schema)
 

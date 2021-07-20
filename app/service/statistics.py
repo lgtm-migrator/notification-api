@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from typing import Any, Dict
 
 from notifications_utils.timezones import convert_utc_to_local_timezone
 
@@ -46,7 +47,7 @@ def format_admin_stats(statistics):
 
 
 def create_stats_dict():
-    stats_dict = {}
+    stats_dict: Dict[str, Any] = {}
     for template in TEMPLATE_TYPES:
         stats_dict[template] = {}
 
@@ -63,7 +64,7 @@ def create_stats_dict():
 
 
 def format_monthly_template_notification_stats(year, rows):
-    stats = {
+    stats: Dict[str, dict] = {
         datetime.strftime(date, "%Y-%m"): {}
         for date in [datetime(year, month, 1) for month in range(4, 13)] + [datetime(year + 1, month, 1) for month in range(1, 4)]
     }
