@@ -1,6 +1,6 @@
 import itertools
 from datetime import datetime
-from typing import Any
+from typing import Any, List
 
 from flask import Blueprint, current_app, jsonify, request
 from notifications_utils.clients.redis import (
@@ -607,8 +607,8 @@ def get_detailed_services(start_date, end_date, only_active=False, include_from_
             include_from_test_key=include_from_test_key,
         )
     results = []
-    for service_id, rows in itertools.groupby(stats, lambda x: x.service_id):
-        rows = list(rows)
+    for service_id, _rows in itertools.groupby(stats, lambda x: x.service_id):
+        rows = list(_rows)
         s = statistics.format_statistics(rows)
         results.append(
             {
