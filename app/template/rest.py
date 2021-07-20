@@ -1,5 +1,6 @@
 import base64
 from io import BytesIO
+from typing import Any, Optional
 
 import botocore
 from flask import Blueprint, current_app, jsonify, request
@@ -100,7 +101,7 @@ def update_template(service_id, template_id):
 
         raise InvalidRequest(errors, 403)
 
-    data = request.get_json()
+    data: Any = request.get_json()
 
     # if redacting, don't update anything else
     if data.get("redact_personalisation") is True:
@@ -234,6 +235,7 @@ def preview_letter_template_by_notification_id(service_id, notification_id, file
         content = base64.b64encode(pdf_file).decode("utf-8")
         overlay = request.args.get("overlay")
         page_number = page if page else "1"
+        path: Optional[str]
 
         if overlay:
             path = "/precompiled/overlay.{}".format(file_type)
@@ -307,7 +309,7 @@ def _get_png_preview_or_overlaid_pdf(url, data, notification_id, json=True):
 
     if resp.status_code != 200:
         raise InvalidRequest(
-            "Error generating preview letter for {} Status code: {} {}".format(notification_id, resp.status_code, resp.content),
+            "Error generating preview letter for {} Status code: {} {!r}".format(notification_id, resp.status_code, resp.content),
             status_code=500,
         )
 
