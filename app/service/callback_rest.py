@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
+from typing import Any
 
 from app.dao.service_callback_api_dao import (
     delete_service_callback_api,
@@ -32,7 +33,7 @@ register_errors(service_callback_blueprint)
 
 @service_callback_blueprint.route("/inbound-api", methods=["POST"])
 def create_service_inbound_api(service_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, create_service_callback_api_schema)
     data["service_id"] = service_id
     inbound_api = ServiceInboundApi(**data)
@@ -46,7 +47,7 @@ def create_service_inbound_api(service_id):
 
 @service_callback_blueprint.route("/inbound-api/<uuid:inbound_api_id>", methods=["POST"])
 def update_service_inbound_api(service_id, inbound_api_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, update_service_callback_api_schema)
 
     to_update = get_service_inbound_api(inbound_api_id, service_id)
@@ -81,7 +82,7 @@ def remove_service_inbound_api(service_id, inbound_api_id):
 
 @service_callback_blueprint.route("/delivery-receipt-api", methods=["POST"])
 def create_service_callback_api(service_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, create_service_callback_api_schema)
     data["service_id"] = service_id
     data["callback_type"] = DELIVERY_STATUS_CALLBACK_TYPE
@@ -96,7 +97,7 @@ def create_service_callback_api(service_id):
 
 @service_callback_blueprint.route("/delivery-receipt-api/<uuid:callback_api_id>", methods=["POST"])
 def update_service_callback_api(service_id, callback_api_id):
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, update_service_callback_api_schema)
 
     to_update = get_service_callback_api(callback_api_id, service_id)

@@ -111,7 +111,7 @@ def get_usage_for_all_services():
             }
             combined[letter_cost.service_id] = letter_entry
     for service_id, breakdown in lb_by_service:
-        combined[service_id]["letter_breakdown"] += breakdown + "\n"
+        combined[service_id]["letter_breakdown"] += f"{breakdown}\n"
 
     # sorting first by name == '' means that blank orgs will be sorted last.
     return jsonify(
@@ -128,7 +128,15 @@ def get_usage_for_all_services():
 
 @platform_stats_blueprint.route("send-method-stats-by-service")
 def get_send_methods_stats_by_service():
-    start_date = datetime.strptime(request.args.get("start_date"), "%Y-%m-%d").date()
-    end_date = datetime.strptime(request.args.get("end_date"), "%Y-%m-%d").date()
+    start_date_str = request.args.get("start_date")
+    end_date_str = request.args.get("end_date")
+
+    if not start_date_str:
+        raise InvalidRequest(message="No start_date provided", status_code=400)
+    if not end_date_str:
+        raise InvalidRequest(message="No end_date provided", status_code=400)
+
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
     return jsonify(send_method_stats_by_service(start_date, end_date))

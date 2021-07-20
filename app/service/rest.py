@@ -1,5 +1,6 @@
 import itertools
 from datetime import datetime
+from typing import Any
 
 from flask import Blueprint, current_app, jsonify, request
 from notifications_utils.clients.redis import (
@@ -235,7 +236,7 @@ def get_service_notification_statistics(service_id):
 
 @service_blueprint.route("", methods=["POST"])
 def create_service():
-    data = request.get_json()
+    data: Any = request.get_json()
 
     if not data.get("user_id"):
         errors = {"user_id": ["Missing data for required field."]}
@@ -263,14 +264,15 @@ def create_service():
 
 @service_blueprint.route("/<uuid:service_id>", methods=["POST"])
 def update_service(service_id):
-    req_json = request.get_json()
+    req_json: Any = request.get_json()
     fetched_service = dao_fetch_service_by_id(service_id)
     # Capture the status change here as Marshmallow changes this later
     service_going_live = fetched_service.restricted and not req_json.get("restricted", True)
     message_limit_changed = fetched_service.message_limit != req_json.get("message_limit", fetched_service.message_limit)
     current_data = dict(service_schema.dump(fetched_service).data.items())
 
-    current_data.update(request.get_json())
+    new_req_json: Any = request.get_json()
+    current_data.update(new_req_json)
 
     service = service_schema.load(current_data).data
 
@@ -386,7 +388,7 @@ def add_user_to_service(service_id, user_id):
         error = "User id: {} already part of service id: {}".format(user_id, service_id)
         raise InvalidRequest(error, status_code=400)
 
-    data = request.get_json()
+    data: Any = request.get_json()
     validate(data, post_set_permissions_schema)
 
     permissions = [Permission(service_id=service_id, user_id=user_id, permission=p["permission"]) for p in data["permissions"]]

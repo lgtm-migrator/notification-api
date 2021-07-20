@@ -1,5 +1,6 @@
-import dateutil
+from dateutil import parser as dateparser
 from flask import Blueprint, current_app, jsonify, request
+from typing import Any, Optional
 
 from app.aws.s3 import get_job_metadata_from_s3
 from app.celery.tasks import process_job
@@ -100,6 +101,7 @@ def get_all_notifications_for_service_job(service_id, job_id):
 
 @job_blueprint.route("", methods=["GET"])
 def get_jobs_by_service(service_id):
+    limit_days: Optional[int]
     if request.args.get("limit_days"):
         try:
             limit_days = int(request.args["limit_days"])
@@ -121,7 +123,7 @@ def create_job(service_id):
     if not service.active:
         raise InvalidRequest("Create job is not allowed: service is inactive ", 403)
 
-    data = request.get_json()
+    data: Any = request.get_json()
 
     data.update({"service": service_id})
     try:
@@ -172,7 +174,7 @@ def get_paginated_jobs(service_id, limit_days, statuses, page):
     data = job_schema.dump(pagination.items, many=True).data
     for job_data in data:
         start = job_data["processing_started"]
-        start = dateutil.parser.parse(start).replace(tzinfo=None) if start else None
+        start = dateparser.parse(start).replace(tzinfo=None) if start else None
 
         if start is None:
             statistics = []
