@@ -70,6 +70,10 @@ target/
 environment.sh
 .envrc
 .env
+.env.*
+!.env.enc.aws
+!.env.example
+
 
 celerybeat-schedule
 celerybeat-schedule.*
@@ -85,3 +89,9 @@ celerybeat.pid
 # Misc
 /scripts/run_my_tests.sh
 jinja_templates/
+
+# Serverless
+.serverless
+
+# Node
+node_modules/

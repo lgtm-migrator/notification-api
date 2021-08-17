@@ -1,0 +1,93 @@
+service: serverless-notify-${env:ENVIRONMENT}
+useDotenv: true
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - __pycache__/**
+    - .mypy_cache/**
+    - .git/**
+    - tests/**
+    - tests-perf/**
+    - tests_smoke/**
+
+custom:
+  wsgi:
+    app: application.application
+    packRequirements: false
+  pythonRequirements:
+    useStaticCache: false
+    dockerizePip: true
+    dockerFile: ./ci/lambda.Dockerfile
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: dev
+  region: ca-central-1
+  vpc:
+    securityGroupIds:
+      - ${env:SECURITY_GROUP_ID}
+    subnetIds:
+      - ${env:SUBNET_ID}
+
+functions:
+  app:
+    handler: wsgi_handler.handler
+    environment:
+      ADMIN_CLIENT_SECRET: ${env:ADMIN_CLIENT_SECRET}
+      ADMIN_CLIENT_USER_NAME: ${env:ADMIN_CLIENT_USER_NAME}
+      ASSET_UPLOAD_BUCKET_NAME: ${env:ASSET_UPLOAD_BUCKET_NAME}
+      ASSET_DOMAIN: ${env:ASSET_DOMAIN}
+      AUTH_TOKENS: ${env:AUTH_TOKENS}
+      AWS_PINPOINT_REGION: ${env:AWS_PINPOINT_REGION}
+      AWS_ROUTE53_ZONE: ${env:AWS_ROUTE53_ZONE}
+      AWS_SES_REGION: ${env:AWS_SES_REGION}
+      AWS_SES_SMTP: ${env:AWS_SES_SMTP}
+      AWS_SES_ACCESS_KEY: ${env:AWS_SES_ACCESS_KEY}
+      AWS_SES_SECRET_KEY: ${env:AWS_SES_SECRET_KEY}
+      BASE_DOMAIN: ${env:BASE_DOMAIN}
+      BULK_SEND_AWS_BUCKET: ${env:BULK_SEND_AWS_BUCKET}
+      BULK_SEND_TEST_SERVICE_ID: ${env:BULK_SEND_TEST_SERVICE_ID}
+      CONTACT_EMAIL: ${env:CONTACT_EMAIL}
+      CSV_UPLOAD_BUCKET_NAME: ${env:CSV_UPLOAD_BUCKET_NAME}
+      CLUSTER_NAME: ${env:CLUSTER_NAME}
+      DANGEROUS_SALT: ${env:DANGEROUS_SALT}
+      DOCUMENTS_BUCKET: ${env:DOCUMENTS_BUCKET}
+      ENVIRONMENT: ${env:ENVIRONMENT}
+      FRESH_DESK_PRODUCT_ID: ${env:FRESH_DESK_PRODUCT_ID}
+      FRESH_DESK_API_URL: ${env:FRESH_DESK_API_URL}
+      FRESH_DESK_API_KEY: ${env:FRESH_DESK_API_KEY}
+      HASURA_ACCESS_KEY: ${env:HASURA_ACCESS_KEY}
+      HASURA_JWT_KEY: ${env:HASURA_JWT_KEY}
+      HC_EN_SERVICE_ID: ${env:HC_EN_SERVICE_ID}
+      MLWR_HOST: ${env:MLWR_HOST}
+      MLWR_USER: ${env:MLWR_USER}
+      MLWR_KEY: ${env:MLWR_KEY}
+      NEW_RELIC_LICENSE_KEY: ${env:NEW_RELIC_LICENSE_KEY}
+      NEW_RELIC_MONITOR_MODE: ${env:NEW_RELIC_MONITOR_MODE}
+      POSTGRES_HOST: ${env:POSTGRES_HOST}
+      POSTGRES_SQL: ${env:POSTGRES_SQL}
+      REDIS_URL: ${env:REDIS_URL}
+      SECRET_KEY: ${env:SECRET_KEY}
+      SQLALCHEMY_POOL_SIZE: ${env:SQLALCHEMY_POOL_SIZE}
+      SQLALCHEMY_DATABASE_URI: ${env:SQLALCHEMY_DATABASE_URI}
+      SQLALCHEMY_DATABASE_READER_URI: ${env:SQLALCHEMY_DATABASE_READER_URI}
+      SENDGRID_API_KEY: ${env:SENDGRID_API_KEY}
+      TWILIO_ACCOUNT_SID: ${env:TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${env:TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_NUMBER: ${env:TWILIO_FROM_NUMBER}
+      SENTRY_URL: ${env:SENTRY_URL}
+      EXTRA_MIME_TYPES: ${env:EXTRA_MIME_TYPES}
+      IP_GEOLOCATE_SERVICE: ${env:IP_GEOLOCATE_SERVICE}
+      ZENDESK_SELL_API_KEY: ${env:ZENDESK_SELL_API_KEY}
+      AWS_US_TOLL_FREE_NUMBER: ${env:AWS_US_TOLL_FREE_NUMBER}
+      FF_NOTIFICATION_CELERY_PERSISTENCE: ${env:FF_NOTIFICATION_CELERY_PERSISTENCE}
+    events:
+      - http: ANY /
+      - http: 'ANY /{proxy+}'

@@ -24,14 +24,14 @@ sentry_sdk.init(
 
 application = Flask("api")
 application.wsgi_app = ProxyFix(application.wsgi_app)  # type: ignore
-create_app(application)
+application = create_app(application)
 
 if os.environ.get("USE_LOCAL_JINJA_TEMPLATES") == "True":
     print("")
     print("========================================================")
     print("")
     print("WARNING: USING LOCAL JINJA from /jinja_templates FOLDER!")
-    print(".env USE_LOCAL_JINJA_TEMPLATES=True")
+    print(".env.old USE_LOCAL_JINJA_TEMPLATES=True")
     print("")
     print("========================================================")
     print("")

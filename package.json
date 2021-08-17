@@ -1,0 +1,25 @@
+{
+  "name": "notification-api",
+  "version": "1.0.0",
+  "description": "Contains: - the public-facing REST API for Notification built on the GOV.UK Notify platform, which teams can integrate with using [their clients](https://www.notifications.service.gov.uk/documentation) - an internal-only REST API built using Flask to manage services, users, templates, etc (this is what the [admin app](http://github.com/cds-snc/notification-admin) talks to) - asynchronous workers built using Celery to put things on queues and read them off to be processed, sent to providers, updated, etc",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cds-snc/notification-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cds-snc/notification-api/issues"
+  },
+  "homepage": "https://github.com/cds-snc/notification-api#readme",
+  "devDependencies": {
+    "serverless-python-requirements": "^5.1.1",
+    "serverless-wsgi": "^2.0.1",
+    "dotenv": "^10.0.0"
+  }
+}
