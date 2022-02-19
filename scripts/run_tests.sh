@@ -44,5 +44,5 @@ pytest --disable-pytest-warnings --cov=app --cov-report=term-missing tests/ --ju
 display_result $? 2 "Unit tests [serial]"
 
 # Run with four concurrent threads.
-pytest --disable-pytest-warnings --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n4 -v --maxfail=10 -m "not serial"
+pytest --disable-pytest-warnings --cov=app --cov-report=term-missing tests/ --junitxml=test_results.xml -n auto -v --maxfail=10 -m "not serial"
 display_result $? 2 "Unit tests [concurrent]"
