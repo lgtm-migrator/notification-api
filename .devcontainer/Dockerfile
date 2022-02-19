@@ -32,6 +32,9 @@ RUN git clone -b v0.9.4 --single-branch https://github.com/ahmetb/kubectx /opt/k
     && ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx \
     && ln -s /opt/kubectx/kubens /usr/local/bin/kubens
 
+# Upgrade pip
+RUN pip install --upgrade pip
+
 RUN curl -O -J -L https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraMono.zip \
     && unzip FiraMono.zip -d ~/.fonts \
     && rm FiraMono.zip \

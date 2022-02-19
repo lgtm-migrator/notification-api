@@ -208,7 +208,7 @@ def test_get_letter_pdf_gets_pdf_from_correct_bucket(
     bucket_name = current_app.config[bucket_config_name]
     filename = datetime.utcnow().strftime(filename_format)
     conn = boto3.resource("s3", region_name="eu-west-1")
-    conn.create_bucket(Bucket=bucket_name)
+    conn.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")
 
@@ -273,7 +273,7 @@ def test_move_failed_pdf_error(notify_api):
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
     conn = boto3.resource("s3", region_name="eu-west-1")
-    bucket = conn.create_bucket(Bucket=bucket_name)
+    bucket = conn.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
 
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")
@@ -291,7 +291,7 @@ def test_move_failed_pdf_scan_failed(notify_api):
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
     conn = boto3.resource("s3", region_name="eu-west-1")
-    bucket = conn.create_bucket(Bucket=bucket_name)
+    bucket = conn.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
 
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")
@@ -309,7 +309,7 @@ def test_copy_redaction_failed_pdf(notify_api):
     bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
 
     conn = boto3.resource("s3", region_name="eu-west-1")
-    bucket = conn.create_bucket(Bucket=bucket_name)
+    bucket = conn.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
 
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")

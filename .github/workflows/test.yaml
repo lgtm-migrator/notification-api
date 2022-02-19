@@ -35,13 +35,6 @@ jobs:
       run: pip install -r requirements_for_test.txt
     - name: Run tests
       run: make test
-    - name: Upload pytest logs on failure
-      if: ${{ failure() }} 
-      uses: actions/upload-artifact@v2
-      with:
-        name: pytest-logs
-        path: |
-          pytest*.log  
     - name: Notify Slack channel if this job fails
       if: ${{ failure() && github.ref == 'refs/heads/main' }}
       run: |

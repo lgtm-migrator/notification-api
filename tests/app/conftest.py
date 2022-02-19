@@ -142,7 +142,11 @@ def sample_sms_code(notify_db, notify_db_session, code=None, code_type="sms", us
     return code
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_service", scope="function")
+def sample_service_fixture(notify_db, notify_db_session):
+    return sample_service(notify_db, notify_db_session)
+
+
 def sample_service(
     notify_db,
     notify_db_session,
@@ -202,7 +206,11 @@ def _sample_service_custom_letter_contact_block(sample_service):
     return sample_service
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_template", scope="function")
+def sample_template_fixture(notify_db, notify_db_session):
+    return sample_template(notify_db, notify_db_session)
+
+
 def sample_template(
     notify_db,
     notify_db_session,
@@ -247,12 +255,20 @@ def sample_template(
     return template
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_template_without_sms_permission", scope="function")
+def sample_template_without_sms_permission_fixture(notify_db, notify_db_session):
+    return sample_template_without_sms_permission(notify_db, notify_db_session)
+
+
 def sample_template_without_sms_permission(notify_db, notify_db_session):
     return sample_template(notify_db, notify_db_session, permissions=[EMAIL_TYPE])
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_template_without_letter_permission", scope="function")
+def sample_template_without_letter_permission_fixture(notify_db, notify_db_session):
+    return sample_template_without_letter_permission(notify_db, notify_db_session)
+
+
 def sample_template_without_letter_permission(notify_db, notify_db_session):
     return sample_template(notify_db, notify_db_session, template_type="letter", permissions=[EMAIL_TYPE])
 
@@ -269,7 +285,11 @@ def sample_sms_template_with_html(sample_service):
     return create_template(sample_service, content="Hello (( Name))\nHere is <em>some HTML</em> & entities")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_email_template", scope="function")
+def sample_email_template_fixture(notify_db, notify_db_session):
+    return sample_email_template(notify_db, notify_db_session)
+
+
 def sample_email_template(
     notify_db,
     notify_db_session,
@@ -302,7 +322,11 @@ def sample_email_template(
     return template
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_template_without_email_permission", scope="function")
+def sample_template_without_email_permission_fixture(notify_db, notify_db_session):
+    return sample_template_without_email_permission(notify_db, notify_db_session)
+
+
 def sample_template_without_email_permission(notify_db, notify_db_session):
     return sample_email_template(notify_db, notify_db_session, permissions=[SMS_TYPE])
 
@@ -348,7 +372,11 @@ def sample_email_template_with_advanced_html(notify_db, notify_db_session):
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_api_key", scope="function")
+def sample_api_key_fixture(notify_db, notify_db_session):
+    return sample_api_key(notify_db, notify_db_session)
+
+
 def sample_api_key(notify_db, notify_db_session, service=None, key_type=KEY_TYPE_NORMAL, name=None):
     if service is None:
         service = create_service(check_if_service_exists=True)
@@ -373,7 +401,11 @@ def sample_team_api_key(notify_db, notify_db_session, service=None):
     return sample_api_key(notify_db, notify_db_session, service, KEY_TYPE_TEAM)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_job", scope="function")
+def sample_job_fixture(notify_db, notify_db_session):
+    return sample_job(notify_db, notify_db_session)
+
+
 def sample_job(
     notify_db,
     notify_db_session,
@@ -471,7 +503,11 @@ def sample_letter_job(sample_letter_template):
     return job
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_notification_with_job", scope="function")
+def sample_notification_with_job_fixture(notify_db, notify_db_session):
+    return sample_notification_with_job(notify_db, notify_db_session)
+
+
 def sample_notification_with_job(
     notify_db,
     notify_db_session,
@@ -513,7 +549,11 @@ def sample_notification_with_job(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_notification", scope="function")
+def sample_notification_fixture(notify_db, notify_db_session):
+    return sample_notification(notify_db, notify_db_session)
+
+
 def sample_notification(
     notify_db,
     notify_db_session,
@@ -719,7 +759,11 @@ def mock_encryption(mocker):
     return mocker.patch("app.encryption.CryptoSigner.sign", return_value="something_encrypted")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_invited_user", scope="function")
+def sample_invited_user_fixture(notify_db, notify_db_session):
+    return sample_invited_user(notify_db, notify_db_session)
+
+
 def sample_invited_user(notify_db, notify_db_session, service=None, to_email_address=None):
 
     if service is None:
@@ -746,7 +790,11 @@ def sample_invited_org_user(notify_db, notify_db_session, sample_user, sample_or
     return create_invited_org_user(sample_organisation, sample_user)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_user_service_permission", scope="function")
+def sample_user_service_permission_fixture(notify_db, notify_db_session):
+    return sample_user_service_permission(notify_db, notify_db_session)
+
+
 def sample_user_service_permission(notify_db, notify_db_session, service=None, user=None, permission="manage_settings"):
     if user is None:
         user = create_user()
@@ -1052,7 +1100,11 @@ def notify_service(notify_db, notify_db_session):
     return service, user
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="sample_service_safelist", scope="function")
+def sample_service_safelist_fixture(notify_db, notify_db_session):
+    return sample_service_safelist(notify_db, notify_db_session)
+
+
 def sample_service_safelist(notify_db, notify_db_session, service=None, email_address=None, mobile_number=None):
     if service is None:
         service = create_service(check_if_service_exists=True)

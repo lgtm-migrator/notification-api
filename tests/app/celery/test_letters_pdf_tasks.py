@@ -492,8 +492,8 @@ def test_process_letter_task_check_virus_scan_passed(
     target_bucket_name = current_app.config[bucket_config_name]
 
     conn = boto3.resource("s3", region_name="ca-central-1")
-    conn.create_bucket(Bucket=source_bucket_name)
-    conn.create_bucket(Bucket=target_bucket_name)
+    conn.create_bucket(Bucket=source_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
+    conn.create_bucket(Bucket=target_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
 
     s3 = boto3.client("s3", region_name="ca-central-1")
     s3.put_object(Bucket=source_bucket_name, Key=filename, Body=b"old_pdf")
@@ -540,8 +540,8 @@ def test_process_letter_task_check_virus_scan_passed_when_sanitise_fails(sample_
     target_bucket_name = current_app.config["INVALID_PDF_BUCKET_NAME"]
 
     conn = boto3.resource("s3", region_name="ca-central-1")
-    conn.create_bucket(Bucket=source_bucket_name)
-    conn.create_bucket(Bucket=target_bucket_name)
+    conn.create_bucket(Bucket=source_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
+    conn.create_bucket(Bucket=target_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
 
     s3 = boto3.client("s3", region_name="ca-central-1")
     s3.put_object(Bucket=source_bucket_name, Key=filename, Body=b"pdf_content")
@@ -583,8 +583,8 @@ def test_process_letter_task_check_virus_scan_passed_when_redaction_fails(
     target_bucket_name = current_app.config[bucket_config_name]
 
     conn = boto3.resource("s3", region_name="eu-west-1")
-    conn.create_bucket(Bucket=bucket_name)
-    conn.create_bucket(Bucket=target_bucket_name)
+    conn.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
+    conn.create_bucket(Bucket=target_bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"})
 
     s3 = boto3.client("s3", region_name="eu-west-1")
     s3.put_object(Bucket=bucket_name, Key=filename, Body=b"pdf_content")
@@ -629,8 +629,8 @@ def test_process_letter_task_check_virus_scan_passed_when_file_cannot_be_opened(
     target_bucket_name = current_app.config["INVALID_PDF_BUCKET_NAME"]
 
     conn = boto3.resource("s3", region_name="ca-central-1")
-    conn.create_bucket(Bucket=source_bucket_name)
-    conn.create_bucket(Bucket=target_bucket_name)
+    conn.create_bucket(Bucket=source_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
+    conn.create_bucket(Bucket=target_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
 
     s3 = boto3.client("s3", region_name="ca-central-1")
     s3.put_object(Bucket=source_bucket_name, Key=filename, Body=b"pdf_content")
@@ -663,7 +663,7 @@ def test_process_virus_scan_passed_logs_error_and_sets_tech_failure_if_s3_error_
 
     source_bucket_name = current_app.config["LETTERS_SCAN_BUCKET_NAME"]
     conn = boto3.resource("s3", region_name="ca-central-1")
-    conn.create_bucket(Bucket=source_bucket_name)
+    conn.create_bucket(Bucket=source_bucket_name, CreateBucketConfiguration={"LocationConstraint": "ca-central-1"})
 
     s3 = boto3.client("s3", region_name="ca-central-1")
     s3.put_object(Bucket=source_bucket_name, Key=filename, Body=b"pdf_content")
