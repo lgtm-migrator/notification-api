@@ -70,6 +70,7 @@ from app.notifications.process_notifications import (
 )
 from app.notifications.validators import (
     check_rate_limiting,
+    check_service_over_daily_sms_limit,
     check_service_can_schedule_notification,
     check_service_email_reply_to_id,
     check_service_has_permission,
@@ -214,7 +215,10 @@ def post_notification(notification_type):
         authenticated_service,
         notification_type,
     )
-
+    
+    if notification_type == SMS_TYPE:
+        check_service_over_daily_sms_limit(api_user, authenticated_service)
+        
     current_app.logger.info(f"Trying to send notification for Template ID: {template.id}")
 
     reply_to = get_reply_to_text(notification_type, form, template)

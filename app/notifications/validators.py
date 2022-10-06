@@ -34,6 +34,8 @@ from app.models import (
     LETTER_TYPE,
     SCHEDULE_NOTIFICATIONS,
     SMS_TYPE,
+    ApiKey,
+    Service,
 )
 from app.notifications.process_notifications import create_content_for_notification
 from app.service.sender import send_notification_to_service_users
@@ -92,7 +94,7 @@ def check_service_over_daily_message_limit(key_type, service):
     counter_name="rate_limit.live_service_daily",
     exception=LiveServiceTooManySMSRequestsError,
 )
-def check_service_over_daily_sms_limit(key_type, service):
+def check_service_over_daily_sms_limit(key_type: ApiKey.key_type, service: Service):
     if current_app.config["FF_SPIKE_SMS_DAILY_LIMIT"] and key_type != KEY_TYPE_TEST and current_app.config["REDIS_ENABLED"]:
         cache_key = sms_daily_count_cache_key(service.id)
         messages_sent = redis_store.get(cache_key)
@@ -103,7 +105,7 @@ def check_service_over_daily_sms_limit(key_type, service):
         warn_about_daily_sms_limit(service, int(messages_sent))
 
 
-def check_rate_limiting(service, api_key, template_type):
+def check_rate_limiting(service: Service, api_key: ApiKey, template_type: str):
     check_service_over_api_rate_limit(service, api_key)
     check_service_over_daily_message_limit(api_key.key_type, service)
     if template_type == "sms":
