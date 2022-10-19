@@ -73,9 +73,10 @@ from app.notifications.process_notifications import (
     persist_notifications,
     send_notification_to_queue,
 )
-from app.notifications.validators import check_service_over_daily_message_limit
+from app.notifications.validators import check_service_over_daily_message_limit, check_service_over_daily_sms_limit
 from app.types import NotificationDictToSign, VerifiedNotification
 from app.utils import get_csv_max_rows
+from app.v2.errors import LiveServiceTooManyRequestsError, LiveServiceTooManySMSRequestsError, TrialServiceTooManyRequestsError
 
 
 @notify_celery.task(name="process-job")
@@ -736,3 +737,28 @@ def _acknowledge_notification(notification_type: Any, template: Any, receipt: UU
         elif template.process_type == BULK:
             email_bulk.acknowledge(receipt)
     current_app.logger.info(f"ACKNOWLEDGED: {notification_type} for receipt_id {receipt}")
+
+def get_jobs_to_queue(jobs: List[Job]) -> List[Job]:
+    """
+    This function takes a list of old jobs from the cleanup function and returns
+    those jobs that can be sent to the queue. It does not return a job if the 
+    associated service is over one of their daily limits.
+    """
+
+    jobs_to_queue: List[Job] = []
+    for job in jobs:
+        try:
+            check_service_over_daily_message_limit(job.api_key.key_type, job.service)
+            if job.template.template_type == SMS_TYPE:
+                check_service_over_daily_sms_limit(job.api_key.key_type, job.service)
+             
+            jobs_to_queue.append(job)
+        except (TrialServiceTooManyRequestsError, LiveServiceTooManyRequestsError) as _:
+            current_app.logger.info(
+                "Job ID: {} not sent because service is over daily combined limit (service id: {})".format(job.id, job.service_id)
+            )
+        except LiveServiceTooManySMSRequestsError:
+            current_app.logger.info(
+                "Job ID: {} not sent because service is over daily SMS limit (service id: {})".format(job.id, job.service_id)
+            )
+    return jobs_to_queue

@@ -112,7 +112,7 @@ def dao_create_job(job):
     db.session.commit()
 
 
-def dao_update_job(job):
+def dao_update_job(job: Job) -> None:
     db.session.add(job)
     db.session.commit()
 

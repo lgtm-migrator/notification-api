@@ -16,7 +16,7 @@ from app import (
     sms_priority,
     zendesk_client,
 )
-from app.celery.tasks import process_job, save_emails, save_smss
+from app.celery.tasks import get_jobs_to_queue, process_job, save_emails, save_smss
 from app.config import QueueNames, TaskNames
 from app.dao.invited_org_user_dao import (
     delete_org_invitations_created_more_than_two_days_ago,
@@ -140,7 +140,7 @@ def check_job_status():
     minutes_ago_120 = datetime.utcnow() - timedelta(minutes=120)
     minutes_ago_125 = datetime.utcnow() - timedelta(minutes=125)
 
-    jobs_not_complete_after_120_minutes = (
+    jobs_not_complete_after_120_minutes: List[Job] = (
         Job.query.filter(
             Job.job_status == JOB_STATUS_IN_PROGRESS,
             and_(
@@ -152,21 +152,22 @@ def check_job_status():
         .all()
     )
 
+    jobs_to_queue = get_jobs_to_queue(jobs_not_complete_after_120_minutes)
     # temporarily mark them as ERROR so that they don't get picked up by future check_job_status tasks
     # if they haven't been re-processed in time.
-    job_ids: List[str] = []
-    for job in jobs_not_complete_after_120_minutes:
+    job_ids_to_queue: List[str] = []
+    for job in jobs_to_queue:
         job.job_status = JOB_STATUS_ERROR
         dao_update_job(job)
-        job_ids.append(str(job.id))
+        job_ids_to_queue.append(str(job.id))
 
-    if job_ids:
+    if job_ids_to_queue:
         notify_celery.send_task(
             name=TaskNames.PROCESS_INCOMPLETE_JOBS,
-            args=(job_ids,),
+            args=(job_ids_to_queue,),
             queue=QueueNames.JOBS,
         )
-        raise JobIncompleteError("Job(s) {} have not completed.".format(job_ids))
+        raise JobIncompleteError("Job(s) {} have not completed.".format(job_ids_to_queue))
 
 
 @notify_celery.task(name="replay-created-notifications")

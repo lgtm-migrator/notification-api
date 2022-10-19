@@ -1362,9 +1362,9 @@ class Job(BaseModel):
         unique=False,
         nullable=False,
     )
-    service = db.relationship("Service", backref=db.backref("jobs", lazy="dynamic"))
+    service: Service = db.relationship("Service", backref=db.backref("jobs", lazy="dynamic"))
     template_id: UUID = db.Column(UUID(as_uuid=True), db.ForeignKey("templates.id"), index=True, unique=False)
-    template = db.relationship("Template", backref=db.backref("jobs", lazy="dynamic"))
+    template: Template = db.relationship("Template", backref=db.backref("jobs", lazy="dynamic"))
     template_version: int = db.Column(db.Integer, nullable=False)
     created_at: datetime.datetime = db.Column(
         db.DateTime,
@@ -1390,7 +1390,7 @@ class Job(BaseModel):
     created_by = db.relationship("User")
     created_by_id: Optional[UUID] = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), index=True, nullable=True)
     api_key_id: Optional[UUID] = db.Column(UUID(as_uuid=True), db.ForeignKey("api_keys.id"), index=True, nullable=True)
-    api_key = db.relationship("ApiKey")
+    api_key: ApiKey = db.relationship("ApiKey")
     scheduled_for: Optional[datetime.datetime] = db.Column(db.DateTime, index=True, unique=False, nullable=True)
     job_status: str = db.Column(
         db.String(255),
