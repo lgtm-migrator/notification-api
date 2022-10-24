@@ -73,6 +73,7 @@ from app.notifications.process_notifications import (
     check_if_request_would_put_service_over_daily_sms_limit,
     persist_notifications,
     send_notification_to_queue,
+    simulated_recipient,
 )
 from app.notifications.validators import check_service_over_daily_message_limit
 from app.types import VerifiedNotification
@@ -161,19 +162,25 @@ def process_rows(rows: List, template: Template, job: Job, service: Service):
     encrypted_emails: List[SignedNotification] = []
     for row in rows:
         client_reference = row.get("reference", None)
+        simulated = simulated_recipient(row.recipient, template_type)
+
         signed_row = signer.sign_notification(
             {
-                "api_key": job.api_key_id and str(job.api_key_id),  # type: ignore
+                "id": create_uuid(),
+                "service_id": str(service.id),
+                "api_key_id": str(job.api_key_id),
                 "key_type": job.api_key.key_type if job.api_key else KEY_TYPE_NORMAL,
-                "template": str(template.id),
+                "template_id": str(template.id),
                 "template_version": job.template_version,
-                "job": str(job.id),
+                "job_id": str(job.id),
                 "to": row.recipient,
                 "row_number": row.index,
                 "personalisation": dict(row.personalisation),
                 "queue": queue_to_use(job.notification_count),
                 "sender_id": sender_id,
                 "client_reference": client_reference.data,  # will return None if missing
+                "reply_to_text": None,  # todo: this should not be None
+                "simulated": simulated,
             }
         )
         if template_type == SMS_TYPE:

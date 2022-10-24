@@ -320,16 +320,20 @@ def process_sms_or_email_notification(
 
     _notification: NotificationDictToSign = {
         "id": create_uuid(),
-        "template": str(template.id),
+        "template_id": str(template.id),
         "service_id": str(service.id),
-        "template_version": str(template.version),  # type: ignore
+        "template_version": template.version,
         "to": form_send_to,
         "personalisation": personalisation,
         "simulated": simulated,
-        "api_key": str(api_key.id),
+        "api_key_id": str(api_key.id),
         "key_type": str(api_key.key_type),
         "client_reference": form.get("reference", None),
         "reply_to_text": reply_to_text,
+        "sender_id": None,
+        "job_id": None,
+        "row_number": None,
+        "queue": None,
     }
 
     signed_notification_data = signer.sign_notification(_notification)

@@ -2,29 +2,27 @@ from typing import Any, NewType, Optional, TypedDict
 
 from flask_bcrypt import check_password_hash, generate_password_hash
 from itsdangerous import URLSafeSerializer
-from typing_extensions import NotRequired  # type: ignore
 
 SignedNotification = NewType("SignedNotification", str)
 
 
 class NotificationDictToSign(TypedDict):
     # todo: remove duplicate keys
-    # todo: remove all NotRequired and decide if key should be there or not
-    id: NotRequired[str]
-    template: str  # actually template_id
-    service_id: NotRequired[str]
+    api_key_id: str
+    id: str
+    key_type: str  # should be ApiKeyType but I can't import that here
+    service_id: str
+    simulated: bool
+    template_id: str
     template_version: int
     to: str  # recipient
-    reply_to_text: NotRequired[str]
-    personalisation: Optional[dict]
-    simulated: NotRequired[bool]
-    api_key: str
-    key_type: str  # should be ApiKeyType but I can't import that here
     client_reference: Optional[str]
-    queue: Optional[str]
-    sender_id: NotRequired[str]
-    job: NotRequired[str]  # actually job_id
+    personalisation: Optional[dict]
+    job_id: Optional[str]
+    reply_to_text: Optional[str]
     row_number: Optional[Any]  # should this be int or str?
+    sender_id: Optional[str]
+    queue: Optional[str]
 
 
 class CryptoSigner:
