@@ -218,7 +218,7 @@ def __sending_limits_for_job_exceeded(service, job: Job, job_id):
 
 @notify_celery.task(bind=True, name="save-smss", max_retries=5, default_retry_delay=300)
 @statsd(namespace="tasks")
-def save_smss(self, service_id: Optional[str], signed_notifications: List[SignedNotification], receipt: Optional[UUID]):
+def save_smss(self, signed_notifications: List[SignedNotification], receipt: Optional[UUID]):
     """
     Function that takes a list of signed notifications, stores
     them in the DB and then sends these to the queue. If the receipt
@@ -234,15 +234,14 @@ def save_smss(self, service_id: Optional[str], signed_notifications: List[Signed
         except BadSignature:
             current_app.logger.exception(f"Invalid signature for signed_notification {signed_notification}")
             raise
-        service_id = _notification.get("service_id", service_id)  # take it it out of the notification if it's there
+        service_id = _notification["service_id"]  # take it it out of the notification if it's there
         service = dao_fetch_service_by_id(service_id, use_cache=True)
 
         template = dao_get_template_by_id(
-            _notification.get("template"), version=_notification.get("template_version"), use_cache=True
+            _notification["template_id"], version=_notification["template_version"], use_cache=True
         )
-        # todo: _notification may not have "sender_id" key
-        sender_id = _notification.get("sender_id")  # type: ignore
-        notification_id = _notification.get("id", create_uuid())
+        sender_id = _notification["sender_id"]
+        notification_id = _notification["id"]
 
         reply_to_text = ""  # type: ignore
         if sender_id:
@@ -259,25 +258,21 @@ def save_smss(self, service_id: Optional[str], signed_notifications: List[Signed
             reply_to_text = template.get_reply_to_text()  # type: ignore
 
         notification: VerifiedNotification = {
-            **_notification,  # type: ignore
+            **_notification,
             "notification_id": notification_id,
             "reply_to_text": reply_to_text,
             "service": service,
-            "key_type": _notification.get("key_type", KEY_TYPE_NORMAL),
+            "key_type": _notification["key_type"] or KEY_TYPE_NORMAL,
             "template_id": template.id,
             "template_version": template.version,
-            "recipient": _notification.get("to"),
-            "personalisation": _notification.get("personalisation"),
+            "recipient": _notification["to"],
             "notification_type": SMS_TYPE,
-            "simulated": _notification.get("simulated", None),
-            "api_key_id": _notification.get("api_key", None),
             "created_at": datetime.utcnow(),
-            "job_id": _notification.get("job", None),
-            "job_row_number": _notification.get("row_number", None),
+            "job_row_number": _notification["row_number"],
         }
 
         verified_notifications.append(notification)
-        notification_id_queue[notification_id] = notification.get("queue")  # type: ignore
+        notification_id_queue[notification_id] = notification["queue"]
         process_type = template.process_type
 
     try:
@@ -332,7 +327,7 @@ def save_smss(self, service_id: Optional[str], signed_notifications: List[Signed
 
 @notify_celery.task(bind=True, name="save-emails", max_retries=5, default_retry_delay=300)
 @statsd(namespace="tasks")
-def save_emails(self, _service_id: Optional[str], signed_notifications: List[SignedNotification], receipt: Optional[UUID]):
+def save_emails(self, signed_notifications: List[SignedNotification], receipt: Optional[UUID]):
     """
     Function that takes a list of signed notifications, stores
     them in the DB and then sends these to the queue. If the receipt
@@ -348,19 +343,18 @@ def save_emails(self, _service_id: Optional[str], signed_notifications: List[Sig
         except BadSignature:
             current_app.logger.exception(f"Invalid signature for signed_notification {signed_notification}")
             raise
-        service_id = _notification.get("service_id", _service_id)  # take it it out of the notification if it's there
+        service_id = _notification["service_id"]  # take it it out of the notification if it's there
         service = dao_fetch_service_by_id(service_id, use_cache=True)
         template = dao_get_template_by_id(
-            _notification.get("template"), version=_notification.get("template_version"), use_cache=True
+            _notification["template_id"], version=_notification["template_version"], use_cache=True
         )
-        # todo: _notification does not have key "sender_id"
-        sender_id = _notification.get("sender_id")  # type: ignore
-        notification_id = _notification.get("id", create_uuid())
+        sender_id = _notification["sender_id"]
+        notification_id = _notification["id"]
         reply_to_text = ""  # type: ignore
         if (
             "reply_to_text" in _notification and _notification["reply_to_text"]
         ):  # first just see if we already have a value of this and use it, otherwise continue with the logic below
-            reply_to_text = _notification["reply_to_text"]  # type: ignore
+            reply_to_text = _notification["reply_to_text"]
         else:
             if sender_id:
                 reply_to_text = dao_get_reply_to_by_id(service_id, sender_id).email_address
@@ -375,25 +369,23 @@ def save_emails(self, _service_id: Optional[str], signed_notifications: List[Sig
         if isinstance(template, tuple):
             template = template[0]
         notification: VerifiedNotification = {
-            **_notification,  # type: ignore
+            **_notification,
             "notification_id": notification_id,
             "reply_to_text": reply_to_text,
             "service": service,
-            "key_type": _notification.get("key_type", KEY_TYPE_NORMAL),
+            "key_type": _notification["key_type"] or KEY_TYPE_NORMAL,
             "template_id": template.id,
             "template_version": template.version,
-            "recipient": _notification.get("to"),
-            "personalisation": _notification.get("personalisation"),
+            "recipient": _notification["to"],
             "notification_type": EMAIL_TYPE,
-            "simulated": _notification.get("simulated", None),
-            "api_key_id": _notification.get("api_key", None),
+            "api_key_id": _notification["api_key_id"],
             "created_at": datetime.utcnow(),
-            "job_id": _notification.get("job", None),
+            "job_id": _notification["job_id"],
             "job_row_number": _notification.get("row_number", None),
         }
 
         verified_notifications.append(notification)
-        notification_id_queue[notification_id] = notification.get("queue")  # type: ignore
+        notification_id_queue[notification_id] = notification["queue"]
         process_type = template.process_type
 
     try:

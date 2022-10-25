@@ -331,31 +331,27 @@ def persist_notifications(notifications: List[VerifiedNotification]) -> List[Not
     lofnotifications = []
 
     for notification in notifications:
-        notification_created_at = notification.get("created_at") or datetime.utcnow()
-        notification_id = notification.get("notification_id", uuid.uuid4())
-        notification_recipient = notification.get("recipient") or notification.get("to")
-        service_id = notification.get("service").id if notification.get("service") else None  # type: ignore
         # todo: potential bug. notification_obj is being created using some keys that don't exist on notification
         # reference, created_by_id, status, billable_units aren't keys on notification at this point
         notification_obj = Notification(
-            id=notification_id,
-            template_id=notification.get("template_id"),
-            template_version=notification.get("template_version"),
-            to=notification_recipient,
-            service_id=service_id,
-            personalisation=notification.get("personalisation"),
-            notification_type=notification.get("notification_type"),
-            api_key_id=notification.get("api_key_id"),
-            key_type=notification.get("key_type"),
-            created_at=notification_created_at,
-            job_id=notification.get("job_id"),
-            job_row_number=notification.get("job_row_number"),
-            client_reference=notification.get("client_reference"),
-            reference=notification.get("reference"),  # type: ignore
-            created_by_id=notification.get("created_by_id"),  # type: ignore
-            status=notification.get("status"),  # type: ignore
-            reply_to_text=notification.get("reply_to_text"),
-            billable_units=notification.get("billable_units"),  # type: ignore
+            id=notification["id"],
+            template_id=notification["template_id"],
+            template_version=notification["template_version"],
+            to=notification["to"],
+            service_id=notification["service_id"],
+            personalisation=notification["personalisation"],
+            notification_type=notification["notification_type"],
+            api_key_id=notification["api_key_id"],
+            key_type=notification["key_type"],
+            created_at=notification["created_at"],
+            job_id=notification["job_id"],
+            job_row_number=notification["job_row_number"],
+            client_reference=notification["client_reference"],
+            reference=notification["reference"],
+            created_by_id=notification["created_by_id"],
+            status=notification["status"],
+            reply_to_text=notification["reply_to_text"],
+            billable_units=notification["billable_units"],
         )
         template = dao_get_template_by_id(notification_obj.template_id, notification_obj.template_version, use_cache=True)
         # if the template is obtained from cache a tuple will be returned where
