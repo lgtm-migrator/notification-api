@@ -1,5 +1,6 @@
 from datetime import timedelta
 from uuid import UUID
+from typing import Union
 
 from flask import current_app
 from notifications_utils.clients.redis import sms_daily_count_cache_key
@@ -8,7 +9,7 @@ from app import redis_store
 from app.dao.services_dao import fetch_todays_total_sms_count
 
 
-def fetch_daily_sms_fragment_count(service_id: UUID) -> int:
+def fetch_daily_sms_fragment_count(service_id: Union[UUID, str]) -> int:
     if current_app.config["REDIS_ENABLED"]:
         cache_key = sms_daily_count_cache_key(service_id)
         fragment_count = redis_store.get(cache_key)
@@ -20,7 +21,7 @@ def fetch_daily_sms_fragment_count(service_id: UUID) -> int:
         return fetch_todays_total_sms_count(service_id)
 
 
-def increment_daily_sms_fragment_count(service_id: UUID, increment_by: int):
+def increment_daily_sms_fragment_count(service_id: Union[UUID, str], increment_by: int):
     if current_app.config["REDIS_ENABLED"]:
         fetch_daily_sms_fragment_count(service_id)  # to make sure it's set in redis
         cache_key = sms_daily_count_cache_key(service_id)

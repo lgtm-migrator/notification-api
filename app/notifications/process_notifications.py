@@ -330,67 +330,64 @@ def persist_notifications(notifications: List[VerifiedNotification]) -> List[Not
 
     lofnotifications = []
 
-    for notification in notifications:
+    for _notification in notifications:
         # todo: potential bug. notification_obj is being created using some keys that don't exist on notification
         # reference, created_by_id, status, billable_units aren't keys on notification at this point
-        notification_obj = Notification(
-            id=notification["id"],
-            template_id=notification["template_id"],
-            template_version=notification["template_version"],
-            to=notification["to"],
-            service_id=notification["service_id"],
-            personalisation=notification["personalisation"],
-            notification_type=notification["notification_type"],
-            api_key_id=notification["api_key_id"],
-            key_type=notification["key_type"],
-            created_at=notification["created_at"],
-            job_id=notification["job_id"],
-            job_row_number=notification["job_row_number"],
-            client_reference=notification["client_reference"],
-            reference=notification["reference"],
-            created_by_id=notification["created_by_id"],
-            status=notification["status"],
-            reply_to_text=notification["reply_to_text"],
-            billable_units=notification["billable_units"],
+        notification = transform_notification(
+            # id=notification["id"],
+            template_id=_notification["template_id"],
+            template_version=_notification["template_version"],
+            recipient=_notification["to"],
+            service=_notification["service"],
+            personalisation=_notification["personalisation"],
+            notification_type=_notification["notification_type"],
+            api_key_id=_notification["api_key_id"],
+            key_type=_notification["key_type"],
+            created_at=_notification["created_at"],
+            job_id=_notification["job_id"],
+            job_row_number=_notification["job_row_number"],
+            client_reference=_notification["client_reference"],
+            # created_by_id=_notification["created_by_id"],
+            # status=_notification["status"],
+            reply_to_text=_notification["reply_to_text"],
         )
-        template = dao_get_template_by_id(notification_obj.template_id, notification_obj.template_version, use_cache=True)
+        template = dao_get_template_by_id(notification.template_id, notification.template_version, use_cache=True)
         # if the template is obtained from cache a tuple will be returned where
         # the first element is the Template object and the second the template cache data
         # in the form of a dict
         if isinstance(template, tuple):
             template = template[0]
-        service = dao_fetch_service_by_id(service_id, use_cache=True)
-        notification_obj.queue_name = choose_queue(
-            notification=notification_obj, research_mode=service.research_mode, queue=template.queue_to_use()
+        service = dao_fetch_service_by_id(notification["service_id"], use_cache=True)
+        notification.queue_name = choose_queue(
+            notification=notification, research_mode=service.research_mode, queue=template.queue_to_use()
         )
 
-        if notification.get("notification_type") == SMS_TYPE:
-            formatted_recipient = validate_and_format_phone_number(notification_recipient, international=True)
+        if notification.notification_type == SMS_TYPE:
+            formatted_recipient = validate_and_format_phone_number(notification.to, international=True)
             recipient_info = get_international_phone_info(formatted_recipient)
-            notification_obj.normalised_to = formatted_recipient
-            notification_obj.international = recipient_info.international
-            notification_obj.phone_prefix = recipient_info.country_prefix
-            notification_obj.rate_multiplier = recipient_info.billable_units
-        elif notification.get("notification_type") == EMAIL_TYPE:
-            notification_obj.normalised_to = format_email_address(notification_recipient)
-        elif notification.get("notification_type") == LETTER_TYPE:
-            notification_obj.postage = notification.get("postage") or notification.get("template_postage")  # type: ignore
+            notification.normalised_to = formatted_recipient
+            notification.international = recipient_info.international
+            notification.phone_prefix = recipient_info.country_prefix
+            notification.rate_multiplier = recipient_info.billable_units
+        elif notification.notification_type == EMAIL_TYPE:
+            notification.normalised_to = format_email_address(notification.to)
+        elif notification.notification_type == LETTER_TYPE:
+            notification.postage = notification.get("postage") or notification.get("template_postage")  # type: ignore
 
-        lofnotifications.append(notification_obj)
-        if notification.get("key_type") != KEY_TYPE_TEST:
-            service_id = notification.get("service").id  # type: ignore
-            if redis_store.get(redis.daily_limit_cache_key(service_id)):
-                redis_store.incr(redis.daily_limit_cache_key(service_id))
-            if current_app.config["FF_SPIKE_SMS_DAILY_LIMIT"] and notification.get("notification_type") == SMS_TYPE:
+        lofnotifications.append(notification)
+        if notification.key_type != KEY_TYPE_TEST:
+            if redis_store.get(redis.daily_limit_cache_key(notification.service_id)):
+                redis_store.incr(redis.daily_limit_cache_key(notification.service_id))
+            if current_app.config["FF_SPIKE_SMS_DAILY_LIMIT"] and notification.notification_type == SMS_TYPE:
                 increment_daily_sms_fragment_count(
-                    service_id, number_of_sms_fragments(template, notification_obj.personalisation)
+                    notification.service_id, number_of_sms_fragments(template, notification.personalisation)
                 )
 
         current_app.logger.info(
             "{} {} created at {}".format(
-                notification.get("notification_type"),
-                notification.get("notification_id"),
-                notification.get("notification_created_at"),  # type: ignore
+                _notification["notification_type"],
+                _notification["id"],
+                _notification["created_at"],
             )
         )
     bulk_insert_notifications(lofnotifications)
