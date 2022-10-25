@@ -351,9 +351,8 @@ def save_emails(self, signed_notifications: List[SignedNotification], receipt: O
         sender_id = _notification["sender_id"]
         notification_id = _notification["id"]
         reply_to_text = ""  # type: ignore
-        if (
-            "reply_to_text" in _notification and _notification["reply_to_text"]
-        ):  # first just see if we already have a value of this and use it, otherwise continue with the logic below
+        # first just see if we already have a value of this and use it, otherwise continue with the logic below
+        if _notification["reply_to_text"]:
             reply_to_text = _notification["reply_to_text"]
         else:
             if sender_id:

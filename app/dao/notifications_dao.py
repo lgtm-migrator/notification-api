@@ -2,6 +2,7 @@ import functools
 import string
 import traceback
 from datetime import datetime, timedelta
+from typing import List
 
 from boto.exception import BotoClientError
 from flask import current_app
@@ -88,7 +89,7 @@ def dao_create_notification(notification):
 
 @statsd(namespace="dao")
 @transactional
-def bulk_insert_notifications(notifications):
+def bulk_insert_notifications(notifications: List[Notification]):
     """
     Takes a list of models.Notifications and inserts or updates the DB
     with the list accordingly
