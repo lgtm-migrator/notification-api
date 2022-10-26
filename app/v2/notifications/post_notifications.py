@@ -353,6 +353,7 @@ def process_sms_or_email_notification(
             reply_to_text=reply_to_text,
         )
         persist_scheduled_notification(notification.id, form["scheduled_for"])
+        return notification
     elif not simulated:
         triage_notification_to_queues(notification_type, signed_notification_data, template)
 
@@ -379,19 +380,12 @@ def process_sms_or_email_notification(
                 queue=template.queue_to_use(),
             )
             db_save_and_send_notification(notification)
-
+            return notification
         else:
             current_app.logger.debug("POST simulated notification for id: {}".format(notification.id))
 
     if not isinstance(notification, Notification):
-        notification["template_id"] = notification["template"]
-        notification["api_key_id"] = notification["api_key"]
-        notification["template_version"] = template.version
         notification["service"] = service
-        notification["service_id"] = service.id
-        notification["reply_to_text"] = reply_to_text
-        del notification["template"]
-        del notification["api_key"]
         del notification["simulated"]
         notification = Notification(**notification)
 

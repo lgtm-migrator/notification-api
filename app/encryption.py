@@ -12,7 +12,6 @@ class NotificationDictToSign(TypedDict):
     id: str
     key_type: str  # should be ApiKeyType but I can't import that here
     service_id: str
-    simulated: bool
     template_id: str
     template_version: int
     to: str  # recipient
@@ -22,6 +21,7 @@ class NotificationDictToSign(TypedDict):
     reply_to_text: Optional[str]
     row_number: Optional[Any]  # should this be int or str?
     sender_id: Optional[str]
+    simulated: Optional[bool]
     queue: Optional[str]
 
 

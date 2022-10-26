@@ -310,7 +310,7 @@ def beat_inbox_sms_normal():
     receipt_id_sms, list_of_sms_notifications = sms_normal.poll()
 
     while list_of_sms_notifications:
-        save_smss.apply_async((None, list_of_sms_notifications, receipt_id_sms), queue=QueueNames.NORMAL_DATABASE)
+        save_smss.apply_async((list_of_sms_notifications, receipt_id_sms), queue=QueueNames.NORMAL_DATABASE)
         current_app.logger.info(f"Batch saving with Normal Priority: SMS receipt {receipt_id_sms} sent to in-flight.")
         receipt_id_sms, list_of_sms_notifications = sms_normal.poll()
 
@@ -328,7 +328,7 @@ def beat_inbox_sms_bulk():
     receipt_id_sms, list_of_sms_notifications = sms_bulk.poll()
 
     while list_of_sms_notifications:
-        save_smss.apply_async((None, list_of_sms_notifications, receipt_id_sms), queue=QueueNames.BULK_DATABASE)
+        save_smss.apply_async((list_of_sms_notifications, receipt_id_sms), queue=QueueNames.BULK_DATABASE)
         current_app.logger.info(f"Batch saving with Bulk Priority: SMS receipt {receipt_id_sms} sent to in-flight.")
         receipt_id_sms, list_of_sms_notifications = sms_bulk.poll()
 
@@ -346,6 +346,6 @@ def beat_inbox_sms_priority():
     receipt_id_sms, list_of_sms_notifications = sms_priority.poll()
 
     while list_of_sms_notifications:
-        save_smss.apply_async((None, list_of_sms_notifications, receipt_id_sms), queue=QueueNames.PRIORITY_DATABASE)
+        save_smss.apply_async((list_of_sms_notifications, receipt_id_sms), queue=QueueNames.PRIORITY_DATABASE)
         current_app.logger.info(f"Batch saving with Bulk Priority: SMS receipt {receipt_id_sms} sent to in-flight.")
         receipt_id_sms, list_of_sms_notifications = sms_priority.poll()

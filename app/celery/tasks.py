@@ -162,8 +162,6 @@ def process_rows(rows: List, template: Template, job: Job, service: Service):
     encrypted_emails: List[SignedNotification] = []
     for row in rows:
         client_reference = row.get("reference", None)
-        simulated = simulated_recipient(row.recipient, template_type)
-
         signed_row = signer.sign_notification(
             {
                 "id": create_uuid(),
@@ -180,7 +178,7 @@ def process_rows(rows: List, template: Template, job: Job, service: Service):
                 "sender_id": sender_id,
                 "client_reference": client_reference.data,  # will return None if missing
                 "reply_to_text": None,  # todo: this should not be None
-                "simulated": simulated,
+                "simulated": None,  # todo: this should not be None
             }
         )
         if template_type == SMS_TYPE:
@@ -192,12 +190,12 @@ def process_rows(rows: List, template: Template, job: Job, service: Service):
     # these objects are transient and will not have relationships loaded
     if encrypted_smss:
         save_smss.apply_async(
-            (str(service.id), encrypted_smss, None),
+            (encrypted_smss, None),
             queue=choose_database_queue(template, service),
         )
     if encrypted_emails:
         save_emails.apply_async(
-            (str(service.id), encrypted_emails, None),
+            (encrypted_emails, None),
             queue=choose_database_queue(template, service),
         )
 

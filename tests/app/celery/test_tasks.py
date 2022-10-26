@@ -174,7 +174,6 @@ class TestBatchSaving:
 
         receipt = uuid.uuid4()
         save_smss(
-            str(sample_template_with_placeholders.service.id),
             [signer.sign(notification1), signer.sign(notification2), signer.sign(notification3)],
             receipt,
         )
@@ -215,7 +214,6 @@ class TestBatchSaving:
 
         receipt = uuid.uuid4()
         save_smss(
-            str(sample_template_with_placeholders.service.id),
             [signer.sign(notification1), signer.sign(notification2), signer.sign(notification3)],
             receipt,
         )
@@ -297,7 +295,6 @@ class TestBatchSaving:
         notifications = [signer.sign(notification1)]
 
         save_smss(
-            None,
             notifications,
             receipt,
         )
@@ -365,7 +362,6 @@ class TestBatchSaving:
         }
         tasks.save_smss.apply_async.assert_called_once_with(
             (
-                str(job.service_id),
                 [
                     "something_encrypted",
                     "something_encrypted",
@@ -410,7 +406,6 @@ class TestBatchSaving:
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
         save_smss(
-            str(sample_template_with_placeholders.service.id),
             [signer.sign(notification1), signer.sign(notification2), signer.sign(notification3)],
             None,
         )
@@ -446,7 +441,7 @@ class TestProcessJob:
         assert signer.sign.call_args[0][0]["personalisation"] == {"phonenumber": "+441234123123"}
         assert signer.sign.call_args[0][0]["row_number"] == 0
         tasks.save_smss.apply_async.assert_called_once_with(
-            (str(sample_job.service_id), ["something_encrypted"], None), queue=QueueNames.NORMAL_DATABASE
+            (["something_encrypted"], None), queue=QueueNames.NORMAL_DATABASE
         )
         job = jobs_dao.dao_get_job_by_id(sample_job.id)
         assert job.job_status == "finished"
@@ -464,7 +459,7 @@ class TestProcessJob:
         process_job(job.id)
 
         tasks.save_smss.apply_async.assert_called_once_with(
-            (str(job.service_id), ["something_encrypted"], None),
+            (["something_encrypted"], None),
             queue="-normal-database-tasks",
         )
 
@@ -594,7 +589,6 @@ class TestProcessJob:
         }
         tasks.save_smss.apply_async.assert_called_once_with(
             (
-                str(job.service_id),
                 [
                     "something_encrypted",
                     "something_encrypted",
@@ -987,7 +981,6 @@ class TestSaveSmss:
         mocked_deliver_sms = mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
         save_smss(
-            sample_template_with_placeholders.service_id,
             [signer.sign(notification)],
             uuid.uuid4(),
         )
@@ -1041,7 +1034,7 @@ class TestSaveSmss:
             False,
         ]
         mocker.patch("app.notifications.process_notifications.choose_queue", return_value="sms_queue")
-        save_smss(sample_template_with_placeholders.service_id, [signer.sign(notification)], uuid.uuid4())
+        save_smss([signer.sign(notification)], uuid.uuid4())
 
         assert mocked_redis_get.called
         persisted_notification = Notification.query.one()
@@ -1075,7 +1068,7 @@ class TestSaveSmss:
 
         notification_id = uuid.uuid4()
 
-        save_smss(template.service_id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
         persisted_notification = Notification.query.one()
         provider_tasks.deliver_sms.apply_async.assert_called_once_with(
             [str(persisted_notification.id)], queue="research-mode-tasks"
@@ -1095,7 +1088,6 @@ class TestSaveSmss:
         notification_id = uuid.uuid4()
 
         save_smss(
-            template.service_id,
             [signer.sign(notification)],
             notification_id,
         )
@@ -1115,7 +1107,6 @@ class TestSaveSmss:
         notification_id = uuid.uuid4()
 
         save_smss(
-            template.service_id,
             [signer.sign(notification)],
             notification_id,
         )
@@ -1135,7 +1126,7 @@ class TestSaveSmss:
 
         notification_id = uuid.uuid4()
 
-        save_smss(template.service_id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         provider_tasks.deliver_throttled_sms.apply_async.assert_called_once_with(
@@ -1153,7 +1144,7 @@ class TestSaveSmss:
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
         notification_id = uuid.uuid4()
-        save_smss(template.service_id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "+16502532222"
@@ -1176,7 +1167,7 @@ class TestSaveSmss:
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
         notification_id = uuid.uuid4()
-        save_smss(template.service_id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.reply_to_text == "12345"
@@ -1188,7 +1179,7 @@ class TestSaveSmss:
 
         notification_id = uuid.uuid4()
         now = datetime.utcnow()
-        save_smss(sample_job.template.service_id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "+1 650 253 2222"
         assert persisted_notification.job_id == sample_job.id
@@ -1221,7 +1212,7 @@ class TestSaveSmss:
         notification_id = uuid.uuid4()
 
         with pytest.raises(Retry):
-            save_smss(sample_template.service_id, [signer.sign(notification)], notification_id)
+            save_smss([signer.sign(notification)], notification_id)
         assert provider_tasks.deliver_sms.apply_async.called is False
         tasks.save_smss.retry.assert_called_with(exc=expected_exception, queue="retry-tasks")
 
@@ -1234,7 +1225,7 @@ class TestSaveSmss:
         notification_id = str(sample_notification.id)
         json["id"] = str(sample_notification.id)
 
-        save_smss(sample_notification.service_id, [signer.sign(json)], notification_id)
+        save_smss([signer.sign(json)], notification_id)
         assert Notification.query.count() == 1
         assert not deliver_sms.called
         assert not retry.called
@@ -1247,7 +1238,7 @@ class TestSaveSmss:
         mocker.patch("app.celery.provider_tasks.deliver_throttled_sms.apply_async")
 
         notification_id = uuid.uuid4()
-        save_smss(service.id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.reply_to_text == "+16502532222"
@@ -1262,7 +1253,7 @@ class TestSaveSmss:
         mocker.patch("app.celery.provider_tasks.deliver_sms.apply_async")
 
         notification_id = uuid.uuid4()
-        save_smss(service.id, [signer.sign(notification)], notification_id)
+        save_smss([signer.sign(notification)], notification_id)
         persisted_notification = Notification.query.one()
         assert persisted_notification.reply_to_text == "new-sender"
 
@@ -1340,7 +1331,6 @@ class TestSaveErrorHandling:
         notifications = [signer.sign(notification1)]
 
         save_smss(
-            str(sample_template_with_placeholders.service.id),
             notifications,
             receipt,
         )
@@ -1421,7 +1411,7 @@ class TestSaveEmails:
         ]
         mocker.patch("app.notifications.process_notifications.choose_queue", return_value="email_normal_queue")
 
-        save_emails(sample_template.service_id, [signer.sign(notification)], uuid.uuid4())
+        save_emails([signer.sign(notification)], uuid.uuid4())
         assert mocked_redis_get.called
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "test@unittest.com"

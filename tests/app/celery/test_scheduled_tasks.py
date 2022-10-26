@@ -512,7 +512,7 @@ class TestHeartbeatQueues:
         beat_inbox_sms_normal()
 
         tasks.save_smss.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-normal-database-tasks",
         )
 
@@ -524,7 +524,7 @@ class TestHeartbeatQueues:
         beat_inbox_sms_bulk()
 
         tasks.save_smss.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-bulk-database-tasks",
         )
 
@@ -536,7 +536,7 @@ class TestHeartbeatQueues:
         beat_inbox_sms_priority()
 
         tasks.save_smss.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-priority-database-tasks.fifo",
         )
 
@@ -548,7 +548,7 @@ class TestHeartbeatQueues:
         beat_inbox_email_normal()
 
         tasks.save_emails.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-normal-database-tasks",
         )
 
@@ -560,7 +560,7 @@ class TestHeartbeatQueues:
         beat_inbox_email_bulk()
 
         tasks.save_emails.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-bulk-database-tasks",
         )
 
@@ -572,7 +572,7 @@ class TestHeartbeatQueues:
         beat_inbox_email_priority()
 
         tasks.save_emails.apply_async.assert_called_once_with(
-            (None, ["1", "2", "3", "4"], "rec123"),
+            (["1", "2", "3", "4"], "rec123"),
             queue="-priority-database-tasks.fifo",
         )
 
