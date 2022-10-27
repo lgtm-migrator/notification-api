@@ -480,7 +480,7 @@ def handle_batch_error_and_forward(
                 # tasks to retry those notifications.
                 if len(signed_and_verified) > 1:
                     save_fn.apply_async(
-                        (service.id, [signed], None),
+                        ([signed], None),
                         queue=choose_database_queue(template, service),
                     )
                     current_app.logger.warning("Made a new task to retry")

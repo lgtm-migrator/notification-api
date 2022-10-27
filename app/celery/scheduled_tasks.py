@@ -256,7 +256,7 @@ def beat_inbox_email_normal():
     receipt_id_email, list_of_email_notifications = email_normal.poll()
 
     while list_of_email_notifications:
-        save_emails.apply_async((None, list_of_email_notifications, receipt_id_email), queue=QueueNames.NORMAL_DATABASE)
+        save_emails.apply_async((list_of_email_notifications, receipt_id_email), queue=QueueNames.NORMAL_DATABASE)
         current_app.logger.info(f"Batch saving with Normal Priority: email receipt {receipt_id_email} sent to in-flight.")
         receipt_id_email, list_of_email_notifications = email_normal.poll()
 
@@ -274,7 +274,7 @@ def beat_inbox_email_bulk():
     receipt_id_email, list_of_email_notifications = email_bulk.poll()
 
     while list_of_email_notifications:
-        save_emails.apply_async((None, list_of_email_notifications, receipt_id_email), queue=QueueNames.BULK_DATABASE)
+        save_emails.apply_async((list_of_email_notifications, receipt_id_email), queue=QueueNames.BULK_DATABASE)
         current_app.logger.info(f"Batch saving with Bulk Priority: email receipt {receipt_id_email} sent to in-flight.")
         receipt_id_email, list_of_email_notifications = email_bulk.poll()
 
@@ -292,7 +292,7 @@ def beat_inbox_email_priority():
     receipt_id_email, list_of_email_notifications = email_priority.poll()
 
     while list_of_email_notifications:
-        save_emails.apply_async((None, list_of_email_notifications, receipt_id_email), queue=QueueNames.PRIORITY_DATABASE)
+        save_emails.apply_async((list_of_email_notifications, receipt_id_email), queue=QueueNames.PRIORITY_DATABASE)
         current_app.logger.info(f"Batch saving with Priority: email receipt {receipt_id_email} sent to in-flight.")
         receipt_id_email, list_of_email_notifications = email_priority.poll()
 

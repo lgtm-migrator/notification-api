@@ -138,7 +138,6 @@ class TestBatchSaving:
         mocker.patch("app.celery.provider_tasks.deliver_email.apply_async")
 
         save_emails(
-            str(template.service_id),
             [signer.sign(notification1), signer.sign(notification2), signer.sign(notification3)],
             None,
         )
@@ -255,7 +254,6 @@ class TestBatchSaving:
         receipt = uuid.uuid4()
 
         save_emails(
-            str(sample_email_template_with_placeholders.service.id),
             [signer.sign(notification1), signer.sign(notification2), signer.sign(notification3)],
             receipt,
         )
@@ -326,7 +324,6 @@ class TestBatchSaving:
         notifications = [signer.sign(notification1)]
 
         save_emails(
-            None,
             notifications,
             receipt,
         )
@@ -545,7 +542,6 @@ class TestProcessJob:
         assert job.job_status == "finished"
         tasks.save_emails.apply_async.assert_called_with(
             (
-                str(job.service_id),
                 [
                     "something_encrypted",
                     "something_encrypted",
@@ -643,7 +639,7 @@ class TestProcessJob:
             "name": "foo",
         }
         tasks.save_emails.apply_async.assert_called_once_with(
-            (str(email_job_with_placeholders.service_id), ["something_encrypted"], None),
+            (["something_encrypted"], None),
             queue="-normal-database-tasks",
         )
         job = jobs_dao.dao_get_job_by_id(email_job_with_placeholders.id)
@@ -679,7 +675,6 @@ class TestProcessJob:
         }
         tasks.save_emails.apply_async.assert_called_once_with(
             (
-                str(email_job_with_placeholders.service_id),
                 ["something_encrypted", "something_encrypted", "something_encrypted", "something_encrypted"],
                 None,
             ),
@@ -704,7 +699,7 @@ class TestProcessJob:
         process_job(job.id)
 
         tasks.save_emails.apply_async.assert_called_once_with(
-            (str(job.service_id), ["something_encrypted"], None), queue="-normal-database-tasks"
+            (["something_encrypted"], None), queue="-normal-database-tasks"
         )
 
     @pytest.mark.skip(reason="the code paths don't exist for letter implementation")
@@ -1355,7 +1350,6 @@ class TestSaveErrorHandling:
         notifications = [signer.sign(notification1)]
 
         save_emails(
-            str(sample_email_template_with_placeholders.service.id),
             notifications,
             receipt,
         )
@@ -1436,7 +1430,7 @@ class TestSaveEmails:
         mocker.patch("app.celery.provider_tasks.deliver_email.apply_async")
 
         notification_id = uuid.uuid4()
-        save_emails(service.id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.reply_to_text == "reply_to@digital.gov.uk"
@@ -1451,7 +1445,7 @@ class TestSaveEmails:
         mocker.patch("app.celery.provider_tasks.deliver_email.apply_async")
 
         notification_id = uuid.uuid4()
-        save_emails(service.id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.reply_to_text == "reply_two@digital.gov.uk"
@@ -1467,7 +1461,7 @@ class TestSaveEmails:
 
         notification_id = uuid.uuid4()
 
-        save_emails(service.id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         provider_tasks.deliver_email.apply_async.assert_called_once_with(
@@ -1486,7 +1480,7 @@ class TestSaveEmails:
 
         notification_id = uuid.uuid4()
 
-        save_emails(service.id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         provider_tasks.deliver_email.apply_async.assert_called_once_with(
@@ -1502,7 +1496,7 @@ class TestSaveEmails:
 
         notification_id = uuid.uuid4()
 
-        save_emails(service.id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         provider_tasks.deliver_email.apply_async.assert_called_once_with([str(persisted_notification.id)], queue="bulk-tasks")
@@ -1558,7 +1552,7 @@ class TestSaveEmails:
         assert t.version > version_on_notification
         now = datetime.utcnow()
 
-        save_emails(sample_email_template.service_id, [signer.sign(notification)], uuid.uuid4())
+        save_emails([signer.sign(notification)], uuid.uuid4())
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "my_email@my_email.com"
@@ -1580,7 +1574,7 @@ class TestSaveEmails:
         notification_id = uuid.uuid4()
         now = datetime.utcnow()
 
-        save_emails(sample_email_template_with_placeholders.service_id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "my_email@my_email.com"
@@ -1608,7 +1602,7 @@ class TestSaveEmails:
 
         notification["sender_id"] = str(other_email_reply_to.id)
 
-        save_emails(sample_email_template.service_id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.notification_type == "email"
@@ -1622,7 +1616,7 @@ class TestSaveEmails:
         notification_id = uuid.uuid4()
         service_email_reply_to_dao.add_reply_to_email_address_for_service(service.id, "default@example.com", True)
 
-        save_emails(sample_email_template.service_id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.notification_type == "email"
@@ -1636,7 +1630,7 @@ class TestSaveEmails:
 
         now = datetime.utcnow()
 
-        save_emails(sample_email_template.service_id, [signer.sign(notification)], notification_id)
+        save_emails([signer.sign(notification)], notification_id)
 
         persisted_notification = Notification.query.one()
         assert persisted_notification.to == "my_email@my_email.com"
@@ -1668,7 +1662,7 @@ class TestSaveEmails:
 
         with pytest.raises(Retry):
 
-            save_emails(sample_email_template.service_id, [signer.sign(notification)], notification_id)
+            save_emails([signer.sign(notification)], notification_id)
 
         assert not provider_tasks.deliver_email.apply_async.called
         tasks.save_emails.retry.assert_called_with(exc=expected_exception, queue="retry-tasks")
@@ -1687,7 +1681,7 @@ class TestSaveEmails:
         notification_id = str(sample_notification.id)
         json["id"] = str(sample_notification.id)
 
-        save_emails(sample_notification.service_id, [signer.sign(json)], notification_id)
+        save_emails([signer.sign(json)], notification_id)
         assert Notification.query.count() == 1
         assert not deliver_email.called
         assert not retry.called
