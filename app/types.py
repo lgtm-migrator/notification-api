@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from app.encryption import NotificationDictToSign
-from app.models import Job, NotificationType, Service
+from app.models import NotificationType, Service
 
 
 class VerifiedNotification(NotificationDictToSign):

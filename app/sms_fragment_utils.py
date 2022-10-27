@@ -1,6 +1,6 @@
 from datetime import timedelta
-from uuid import UUID
 from typing import Union
+from uuid import UUID
 
 from flask import current_app
 from notifications_utils.clients.redis import sms_daily_count_cache_key

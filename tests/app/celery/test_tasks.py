@@ -440,9 +440,7 @@ class TestProcessJob:
         assert signer.sign.call_args[0][0]["template_version"] == sample_job.template.version
         assert signer.sign.call_args[0][0]["personalisation"] == {"phonenumber": "+441234123123"}
         assert signer.sign.call_args[0][0]["row_number"] == 0
-        tasks.save_smss.apply_async.assert_called_once_with(
-            (["something_encrypted"], None), queue=QueueNames.NORMAL_DATABASE
-        )
+        tasks.save_smss.apply_async.assert_called_once_with((["something_encrypted"], None), queue=QueueNames.NORMAL_DATABASE)
         job = jobs_dao.dao_get_job_by_id(sample_job.id)
         assert job.job_status == "finished"
         assert job.processing_started is not None

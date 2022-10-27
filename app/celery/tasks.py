@@ -73,7 +73,6 @@ from app.notifications.process_notifications import (
     check_if_request_would_put_service_over_daily_sms_limit,
     persist_notifications,
     send_notification_to_queue,
-    simulated_recipient,
 )
 from app.notifications.validators import check_service_over_daily_message_limit
 from app.types import VerifiedNotification
@@ -235,9 +234,7 @@ def save_smss(self, signed_notifications: List[SignedNotification], receipt: Opt
         service_id = _notification["service_id"]  # take it it out of the notification if it's there
         service = dao_fetch_service_by_id(service_id, use_cache=True)
 
-        template = dao_get_template_by_id(
-            _notification["template_id"], version=_notification["template_version"], use_cache=True
-        )
+        template = dao_get_template_by_id(_notification["template_id"], version=_notification["template_version"], use_cache=True)
         sender_id = _notification["sender_id"]
         notification_id = _notification["id"]
 
@@ -256,7 +253,7 @@ def save_smss(self, signed_notifications: List[SignedNotification], receipt: Opt
             reply_to_text = template.get_reply_to_text()  # type: ignore
 
         notification: VerifiedNotification = {
-            **_notification,
+            **_notification,  # type: ignore
             "notification_id": notification_id,
             "reply_to_text": reply_to_text,
             "service": service,
@@ -343,12 +340,10 @@ def save_emails(self, signed_notifications: List[SignedNotification], receipt: O
             raise
         service_id = _notification["service_id"]  # take it it out of the notification if it's there
         service = dao_fetch_service_by_id(service_id, use_cache=True)
-        template = dao_get_template_by_id(
-            _notification["template_id"], version=_notification["template_version"], use_cache=True
-        )
+        template = dao_get_template_by_id(_notification["template_id"], version=_notification["template_version"], use_cache=True)
         sender_id = _notification["sender_id"]
         notification_id = _notification["id"]
-        reply_to_text = ""  # type: ignore
+        reply_to_text: Optional[str] = ""
         # first just see if we already have a value of this and use it, otherwise continue with the logic below
         if _notification["reply_to_text"]:
             reply_to_text = _notification["reply_to_text"]
@@ -359,14 +354,14 @@ def save_emails(self, signed_notifications: List[SignedNotification], receipt: O
             # the first element is the Template object and the second the template cache data
             # in the form of a dict
             elif isinstance(template, tuple):
-                reply_to_text = template[1].get("reply_to_text")  # type: ignore
+                reply_to_text = template[1].get("reply_to_text")
             else:
-                reply_to_text = template.get_reply_to_text()  # type: ignore
+                reply_to_text = template.get_reply_to_text()
 
         if isinstance(template, tuple):
             template = template[0]
         notification: VerifiedNotification = {
-            **_notification,
+            **_notification,  # type: ignore
             "notification_id": notification_id,
             "reply_to_text": reply_to_text,
             "service": service,
